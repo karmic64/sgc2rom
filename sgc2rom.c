@@ -38,6 +38,7 @@ int main(int argc, char *argv[])
     
     for (int arg = 1; arg < argc; arg++)
     {
+        if (arg > 1) putchar('\n');
         printf("Reading %s\n", argv[arg]);
         
         FILE* infile = fopen(argv[arg], "rb");
@@ -190,8 +191,6 @@ int main(int argc, char *argv[])
         FILE* outfile = fopen(strcat(argv[arg], systype ? ".gg" : ".sms"), "wb");
         fwrite(outbuf, 1, outsize, outfile);
         fclose(outfile);
-        
-        if (arg < argc-1) putchar('\n');
     }
     
 }
