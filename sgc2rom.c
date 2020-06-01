@@ -63,7 +63,7 @@ int main(int argc, char *argv[])
         if (memcmp(inbuf, "SGC\x1a", sizeof("SGC\x1a")-1))
         {
             puts("Not an SGC");
-            continue;
+            goto fail;
         }
         int errcnt = 0;
         if (*(inbuf+4) != 1)
@@ -83,7 +83,7 @@ int main(int argc, char *argv[])
             errcnt++;
         }
         if (errcnt)
-            continue;
+            goto fail;
         
         uint16_t load = get16(inbuf+8);
         uint32_t end = load + (insize - 0xa0 - 1);
@@ -91,7 +91,7 @@ int main(int argc, char *argv[])
         if (load < 0x0400)
         {
             puts("Illegal load address");
-            continue;
+            goto fail;
         }
         uint16_t init = get16(inbuf+10);
         uint16_t play = get16(inbuf+12);
@@ -99,14 +99,14 @@ int main(int argc, char *argv[])
         if (init < load || init > end || init >= 0xc000)
         {
             puts("Illegal init address");
-            continue;
+            goto fail;
         }
         uint16_t sp = get16(inbuf+14);
         printf("SGC initial stack pointer: $%04X\n", sp);
         if (sp < 0xc002 || (sp > 0xdff0 && sp < 0xe002) || (sp > 0xfff0))
         {
             puts("Illegal stack pointer");
-            continue;
+            goto fail;
         }
         uint16_t rst[7];
         printf("SGC RST pointers: ");
@@ -131,12 +131,12 @@ int main(int argc, char *argv[])
         if (!totalsongs)
         {
             puts("Illegal amount of songs");
-            continue;
+            goto fail;
         }
         if (startsong >= totalsongs)
         {
             puts("Illegal default song");
-            continue;
+            goto fail;
         }
         if (firstsfx < totalsongs || lastsfx < firstsfx)
         { /* if the sfx range is invalid, assume no sfx */
@@ -150,7 +150,6 @@ int main(int argc, char *argv[])
             outsize = 0x10000;
         uint8_t *outbuf = malloc(outsize);
         memcpy(outbuf+load, inbuf+0xa0, insize - 0xa0);
-        free(inbuf);
         memcpy(outbuf, driver, driversize);
         write16(outbuf+2, sp);
         for (int i = 0; i < 7; i++)
@@ -191,6 +190,8 @@ int main(int argc, char *argv[])
         FILE* outfile = fopen(strcat(argv[arg], systype ? ".gg" : ".sms"), "wb");
         fwrite(outbuf, 1, outsize, outfile);
         fclose(outfile);
+        free(outbuf);
+fail:   free(inbuf);
     }
     
 }
