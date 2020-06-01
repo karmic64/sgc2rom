@@ -3,7 +3,7 @@ Sega Master System/Game Gear SGC to ROM converter.
 
 
 ## Usage
-Usage is nothing more than `sgc2rom sgcfile`. If everything went well, a ROM will be created with the same filename as the SGC with `.sms` or `.gg` appended to it.
+Usage is nothing more than `sgc2rom [sgcfile]...`. If everything went well, ROMs will be created with the same filename as the SGCs with `.sms` or `.gg` appended to it.
 
 When you load the ROM, use the D-Pad to step through songs and any other button to restart the current one. The Reset button may be used to return to the default song.
 
