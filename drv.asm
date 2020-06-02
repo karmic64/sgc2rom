@@ -53,27 +53,25 @@ psg_mute_tbl:
             .define prvjoy $dffa
             
             
-reset:      xor a
+reset:      ld a,$7f
             ld (prvjoy),a
-            out ($bf),a
-            ld a,$81
-            out ($bf),a
-            
-            ld a,$0f
             out ($3f),a
             out ($f2),a
+            ld bc,$80bf
+            ld a,4
+            out (c),a
+            out (c),b
+            inc b
+            ld a,$20
+            out (c),a
+            out (c),b
             
+            im 2 ;sgc uses $38 so can't use im 1
+            ld a,2
+            ld i,a
+                
 resetbtn:   ld a,(startsong)
             ld (tuneid),a
-            
-clear:      ld hl,psg_mute_tbl
-            ld bc,$047f
-            otir
-            
-            ld hl,mappercfg
-            ld de,$fffc
-            ld bc,4
-            ldir
             
             jr +
             
@@ -81,6 +79,17 @@ clear:      ld hl,psg_mute_tbl
             retn
             
 +:          
+            
+clear:      ld hl,mappercfg
+            ld de,$fffc
+            ld bc,4
+            ldir
+            
+            ld hl,psg_mute_tbl
+            ld bc,$047f
+            otir
+            
+            
             ld b,9
 -:          ld a,b
             add $0f
@@ -106,9 +115,8 @@ clear:      ld hl,psg_mute_tbl
             
             
 main:       in a,($bf)
--:          in a,($bf)
-            rlca
-            jr nc,-
+            ei
+            halt
             
             call play
             
@@ -163,6 +171,13 @@ clear_ym_reg:
             out ($f1),a
 ym_delay:   push af
             pop af
+            ret
+            
+            
+            .orga $0200
+            .dsb 257, 3
+            
+            .orga $0303
             ret
             
             
