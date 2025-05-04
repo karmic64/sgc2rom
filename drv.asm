@@ -51,6 +51,7 @@ psg_mute_tbl:
             
             .define tuneid $dffb
             .define prvjoy $dffa
+            .define stopped $dff9
             
             
 reset:      ld a,$7f
@@ -76,6 +77,10 @@ resetbtn:   ld a,(startsong)
             jr +
             
             .orga $66
+            push af
+            ld a,1
+            ld (stopped),a
+            pop af
             retn
             
 +:          
@@ -85,25 +90,16 @@ clear:      ld hl,mappercfg
             ld bc,4
             ldir
             
-            ld hl,psg_mute_tbl
-            ld bc,$047f
-            otir
-            
-            
-            ld b,9
--:          ld a,b
-            add $0f
-            call clear_ym_reg
-            ld a,b
-            add $1f
-            call clear_ym_reg
-            djnz -
+            call clear_sound
             
             ld hl,$c001 ;don't clear $c000 because bios might store $3e here
             ld (hl),0
             ld de,$c002
             ld bc,$1fee
             ldir
+            
+            xor a
+            ld (stopped),a
             
             ld a,(tuneid)
             ld hl,totalsongs
@@ -118,7 +114,7 @@ main:       in a,($bf)
             ei
             halt
             
-            call play
+            call play_sub
             
             ld hl,prvjoy
             ld b,(hl)
@@ -163,6 +159,34 @@ main:       in a,($bf)
             jp nz,clear
             jr main
             
+
+
+
+play_sub:
+            ld hl,stopped
+            ld a,(hl)
+            dec a
+            jp m,play
+            ret nz
+            ld (hl),2
+
+clear_sound:
+            ld hl,psg_mute_tbl
+            ld bc,$047f
+            otir
+            
+            
+            ld b,9
+-:          ld a,b
+            add $0f
+            call clear_ym_reg
+            ld a,b
+            add $1f
+            call clear_ym_reg
+            djnz -
+
+            ret
+
             
 clear_ym_reg:
             out ($f0),a
