@@ -116,6 +116,18 @@ main:       in a,($bf)
             
             call play_sub
             
+            ld hl,stopped
+            ld a,(hl)
+            or a
+            jr nz,+
+            in a,($38)
+            cp a,$38
+            jr z,+
+            in a,($00)
+            or a
+            jp m,+
+            ld (hl),1
++:
             ld hl,prvjoy
             ld b,(hl)
             in a,($dd)
@@ -185,7 +197,7 @@ clear_sound:
             call clear_ym_reg
             djnz -
 
-            ret
+            ret            
 
             
 clear_ym_reg:
